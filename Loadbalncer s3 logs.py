@@ -1,14 +1,19 @@
 import boto3
 from openpyxl import Workbook
 
+#Creating an Excel workbook
 wb = Workbook()
 wb.create_sheet("Sheet_one")
 
+#Creating Column Names in One Sheet
 ws1 = wb['Sheet_one']
 ws1['A2'] = 'LoadBalncer Name'
 ws1['B2'] = 'Bucket Path'
 
-boto3.setup_default_session(profile_name='TejaProd', region_name='us-east-1')
+Profile=input('Enter your Profile name')
+Region=input('Enter the Region where you want to get the Loadbalancer data from:')
+
+boto3.setup_default_session(profile_name=Profile, region_name=Region)
 
 def get_all_load_balancer_access_logs_buckets():
     try:
@@ -55,10 +60,7 @@ def get_load_balancer_access_logs_buckets(load_balancer_names):
     except Exception as e:
         print("Error: ", e)
         return None
-
-# Replace the list below with the actual names of your load balancers 
-
-# Call the function to get the S3 bucket paths for the load balancers
+# I am using 2 for loops here. Optimization is welcome here.
 for i in range(0,len(load_balancer_namest)):
     A=[]
     A.append(load_balancer_namest[i])
@@ -76,5 +78,5 @@ for i in range(0,len(load_balancer_namest)):
             ws1.cell(row_start+i, col_start).value = f"{bucket_dict['Value']}/{path_dict['Value']}/"
     else:
         print("Failed to fetch the access logs S3 bucket paths.")
-
+#Saving the Excel Sheet after all the cells are updated.
 wb.save('LoadBalancerPaths.xlsx')
